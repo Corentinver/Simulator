@@ -44,7 +44,7 @@ public class FireGeneratorThread implements Runnable {
 
     @Override
     public void run() {
-        while (!generated) {
+        while (true) {
             try {
                 Thread.sleep(3 * 1000);
 
@@ -65,10 +65,10 @@ public class FireGeneratorThread implements Runnable {
                     fire.setId(id);
                     fires.add(fire);
                     FireManager.getInstance();
-                    Thread thread = new Thread(new FireManagerThread(fire));
-                   
-                    thread.start();
-                    thread.join();
+                    Thread fireThread = new Thread(new FireManagerThread(fire));
+                    fireThread.start();
+                    fireThread.join(); // On attends que le feu soit eteint pour en refaire un.
+                    // On pourra enlever le thread join quand on voudra continuer la génération des feu pendant une opération
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -88,7 +88,6 @@ public class FireGeneratorThread implements Runnable {
         int number = rand.nextInt(100); // Pourcentage
         System.out.println(number);
         if (number > 70) {
-            generated = false;
             result = true;
         }
         return result;
