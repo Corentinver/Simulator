@@ -21,11 +21,10 @@ public class SimulatorApplication {
 	public CommandLineRunner SimulatorDemo() {
 		return (args) -> {
 			Thread fireGeneratorThread = new Thread(new FireGeneratorThread());
-			while (true) {
-				fireGeneratorThread.start();
-				fireGeneratorThread.join();
-				System.out.println("Suite");
-			}
+			fireGeneratorThread.start();
+			fireGeneratorThread.join();
+			
+				
 		};
 	}
 
