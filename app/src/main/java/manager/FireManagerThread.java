@@ -22,11 +22,12 @@ public class FireManagerThread implements Runnable {
         try {
           fire.state = FireDTO.stateFire.InOperation;
           restService.updateFire(fire);
+          System.out.println("Fire id :" + fire.id);
           while (fire.getIntensity() != 0 || fire.getSize() != 0) {
             System.out.println("Run fire");
             System.out.println("int : " + fire.getIntensity());
             System.out.println("size : " + fire.getSize());
-            Thread.sleep(1000);
+            Thread.sleep(5000);
             if (inOperation) {
               if (fire.getIntensity() != 0) {
                 fire.setIntensity(fire.getIntensity() - 1);
@@ -34,6 +35,7 @@ public class FireManagerThread implements Runnable {
               if (fire.getSize() != 0) {
                 fire.setSize(fire.getSize() - 1);
               }
+              restService.updateFire(fire);
             }
           }
           System.out.println("Fire completed");
@@ -51,10 +53,10 @@ public class FireManagerThread implements Runnable {
 
       @Override
       public void run() {
-        synchronized (FireManager.getInstance().getLockOperation()) {
+        synchronized (FireManager.getInstance().getLockFireThreads(fire.id)) {
           try {
             System.out.println("Waiting");
-            FireManager.getInstance().getLockOperation().wait();
+            FireManager.getInstance().getLockFireThreads(fire.id).wait();
             inOperation = true;
             System.out.println("good");
           } catch (InterruptedException e) {
@@ -74,6 +76,9 @@ public class FireManagerThread implements Runnable {
     try {
       fireEvolution.join();
       waitingOperation.join();
+
+      FireManager.getInstance().removeThread(fire.id);
+      FireManager.getInstance().removeResources(fire.id);
     } catch (InterruptedException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();

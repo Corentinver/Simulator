@@ -34,7 +34,6 @@ public class FireGeneratorThread implements Runnable {
     public FireGeneratorThread() {
         simulatorService = new SimulatorService();
         restService = new RestService();
-        fires = new ArrayList<FireDTO>();
         fireStations = simulatorService.getAllFireStation();
         fireFighters = simulatorService.getAllFireFighter();
         vehicles = simulatorService.getAllVehicle();
@@ -46,9 +45,9 @@ public class FireGeneratorThread implements Runnable {
     public void run() {
         while (true) {
             try {
-                Thread.sleep(3 * 1000);
+                Thread.sleep(5000*(FireManager.getInstance().getNumberFireThread()+1));
 
-                if (generateFire()) {
+                if (generateFire() && FireManager.getInstance().getNumberFireThread() < 2) {
                     PointDTO locationFire = getRandomLocationFromSensor(sensors);
                     Random rand = new Random();
 
@@ -59,15 +58,16 @@ public class FireGeneratorThread implements Runnable {
                     fire.setLocation(locationFire);
                     fire.setTypeFire(idTypeFire);
                     fire.setState(FireDTO.stateFire.Initialize);
-                    fire.setIntensity(10);
-                    fire.setSize(2);
+                    fire.setIntensity(20);
+                    fire.setSize(3);
                     String id = restService.newFire(fire);
                     fire.setId(id);
-                    fires.add(fire);
-                    FireManager.getInstance();
                     Thread fireThread = new Thread(new FireManagerThread(fire));
-                    fireThread.start();
-                    fireThread.join(); // On attends que le feu soit eteint pour en refaire un.
+                    FireManager.getInstance().addThread(fireThread, id);
+                    FireManager.getInstance().addResources(new Object(), id);
+                    FireManager.getInstance().getFireThreads(id).start();
+                    //FireManager.getInstance().getFireThreads(id).join();
+                    // On attends que le feu soit eteint pour en refaire un.
                     // On pourra enlever le thread join quand on voudra continuer la génération des feu pendant une opération
                 }
             } catch (Exception e) {

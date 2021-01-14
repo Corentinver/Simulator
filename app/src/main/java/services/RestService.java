@@ -62,17 +62,20 @@ public class RestService {
 		}
 	}
 
-	public void newOperation(OperationDTO operationDTO) {
+	public OperationDTO newOperation(OperationDTO operationDTO) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		ObjectMapper objectMapper = new ObjectMapper();
 		HttpEntity<String> request;
+		ResponseEntity<OperationDTO> responseEntity = null;
 		try {
 			request = new HttpEntity<String>(objectMapper.writeValueAsString(operationDTO), headers);
-			restTemplate.postForEntity("http://localhost:8080/newOperation", request, OperationDTO.class);
+			responseEntity = restTemplate.postForEntity("http://localhost:8080/newOperation", request, OperationDTO.class);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
+
+		return responseEntity.getBody();
 	}
 
 	public void updateOperation(OperationDTO operationDTO) {

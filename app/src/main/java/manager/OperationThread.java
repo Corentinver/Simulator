@@ -21,15 +21,16 @@ public class OperationThread implements Runnable {
 
     @Override
     public void run() {
-        for(RideDTO ride : this.ridesDTO){
-            restService.sendRide(ride);
-        }
-        synchronized(FireManager.getInstance().getLockOperation()){
+        synchronized(FireManager.getInstance().getLockFireThreads(operationDTO.idFire)){
             try {
+                for(RideDTO ride : this.ridesDTO){
+                    Thread.sleep(300);
+                    restService.sendRide(ride);
+                }
                 System.out.println("Run operation thread");
                 System.out.println(getMeanDuration());
-                Thread.sleep(getMeanDuration()*1000);
-                FireManager.getInstance().getLockOperation().notify();
+                Thread.sleep(getMeanDuration()*10);
+                FireManager.getInstance().getLockFireThreads(operationDTO.idFire).notify();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
